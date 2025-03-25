@@ -1,0 +1,41 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Build
+      run: |
+        dotnet restore
+        dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
+        dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true
+        dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true
+    
+    - name: Zip Release Files
+      run: |
+        Compress-Archive -Path "Il2CppDumper/bin/Release/net9.0/win-x64/publish/*" -DestinationPath "Il2CppDumper-win-x64.zip"
+        Compress-Archive -Path "Il2CppDumper/bin/Release/net9.0/linux-x64/publish/*" -DestinationPath "Il2CppDumper-linux-x64.zip"
+        Compress-Archive -Path "Il2CppDumper/bin/Release/net9.0/osx-x64/publish/*" -DestinationPath "Il2CppDumper-osx-x64.zip"
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          Il2CppDumper-win-x64.zip
+          Il2CppDumper-linux-x64.zip
+          Il2CppDumper-osx-x64.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
