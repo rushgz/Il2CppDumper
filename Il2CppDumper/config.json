@@ -5,7 +5,7 @@
   "DumpAttribute": true,
   "DumpFieldOffset": true,
   "DumpMethodOffset": true,
-  "DumpTypeDefIndex": true,
+  "DumpTypeDefIndex": false,
   "GenerateDummyDll": true,
   "GenerateStruct": true,
   "DummyDllAddToken": true,

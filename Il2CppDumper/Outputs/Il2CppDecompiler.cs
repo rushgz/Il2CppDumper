@@ -29,7 +29,10 @@ namespace Il2CppDumper
             for (var imageIndex = 0; imageIndex < metadata.imageDefs.Length; imageIndex++)
             {
                 var imageDef = metadata.imageDefs[imageIndex];
-                writer.Write($"// Image {imageIndex}: {metadata.GetStringFromIndex(imageDef.nameIndex)} - {imageDef.typeStart}\n");
+                var suffix = config.DumpTypeDefIndex 
+                    ? $" - {imageDef.typeStart}"
+                    : string.Empty;
+                writer.Write($"// Image {imageIndex}: {metadata.GetStringFromIndex(imageDef.nameIndex)}{suffix}\n");
             }
             //dump type
             foreach (var imageDef in metadata.imageDefs)
@@ -58,6 +61,10 @@ namespace Il2CppDumper
                                 var @interface = il2Cpp.types[metadata.interfaceIndices[typeDef.interfacesStart + i]];
                                 extends.Add(executor.GetTypeName(@interface, false, false));
                             }
+                        }
+                        if(!config.DumpTypeDefIndex){
+                            // 添加 dll 名称注释
+                            writer.Write($"\n// Dll : {imageName}");
                         }
                         writer.Write($"\n// Namespace: {metadata.GetStringFromIndex(typeDef.namespaceIndex)}\n");
                         if (config.DumpAttribute)
