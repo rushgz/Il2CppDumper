@@ -50,6 +50,11 @@ namespace Il2CppDumper
                     else if (Directory.Exists(arg))
                     {
                         outputDir = Path.GetFullPath(arg) + Path.DirectorySeparatorChar;
+                    }else
+                    {
+                        outputDir = Path.GetFullPath(arg) + Path.DirectorySeparatorChar;
+                        //创建文件夹
+                        Directory.CreateDirectory(outputDir);
                     }
                 }
             }
