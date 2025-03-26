@@ -261,15 +261,25 @@ namespace Il2CppDumper
                                     if (!isAbstract && methodPointer > 0)
                                     {
                                         var fixedMethodPointer = il2Cpp.GetRVA(methodPointer);
-                                        writer.Write("\t// RVA: 0x{0:X} Offset: 0x{1:X} VA: 0x{2:X}", fixedMethodPointer, il2Cpp.MapVATR(methodPointer), methodPointer);
+                                        if (config.DumpMethodSimplify){
+                                            writer.Write("\t// RVA: 0x{0:X} VA: 0x{1:X}", fixedMethodPointer, methodPointer);
+                                        }else{
+                                            writer.Write("\t// RVA: 0x{0:X} Offset: 0x{1:X} VA: 0x{2:X}", fixedMethodPointer, il2Cpp.MapVATR(methodPointer), methodPointer);
+                                        }
                                     }
                                     else
                                     {
-                                        writer.Write("\t// RVA: -1 Offset: -1");
+                                        if(config.DumpMethodSimplify){
+                                            writer.Write("\t// RVA: -1 VA: -1");
+                                        }else{
+                                            writer.Write("\t// RVA: -1 Offset: -1");
+                                        }
                                     }
-                                    if (methodDef.slot != ushort.MaxValue)
-                                    {
-                                        writer.Write(" Slot: {0}", methodDef.slot);
+                                    if (!config.DumpMethodSimplify){
+                                        if (methodDef.slot != ushort.MaxValue)
+                                        {
+                                            writer.Write(" Slot: {0}", methodDef.slot);
+                                        }
                                     }
                                     writer.Write("\n");
                                 }
