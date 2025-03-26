@@ -14,6 +14,23 @@ Unity il2cpp逆向工程
 * 支持从内存dump的`libil2cpp.so`文件以绕过保护
 * 支持绕过简单的PE保护
 
+## 新增
+
+### Releases新增对linux、mac平台的支持
+
+#### mac平台示例用法
+##### 通用命令
+```
+./Il2CppDumper <executable-file> <global-metadata> <output-directory>
+```
+##### 针对ipa文件的快捷命令
+```
+./Il2CppDumper <ipa-app-dir> <out-dir>
+```
+- ```ipa-app-dir``` 为ipa解压后Payload文件夹下的*.app文件夹
+- ```<out-dir>``` 为空时, 自动导出目录为 ```<ipa-app-dir>/../../out/```
+
+
 ## 使用说明
 
 直接运行Il2CppDumper.exe并依次选择il2cpp的可执行文件和global-metadata.dat文件，然后根据提示输入相应信息。

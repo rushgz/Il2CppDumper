@@ -16,6 +16,23 @@ Unity il2cpp reverse engineer
 * Supports Android memory dumped `libil2cpp.so` file to bypass protection
 * Support bypassing simple PE protection
 
+## New
+
+### Added Support for Linux and macOS Platforms in Releases
+
+#### Usage Example on macOS
+##### General Command
+```
+./Il2CppDumper <executable-file> <global-metadata> <output-directory>
+```
+##### Shortcut Command for IPA Files
+```
+./Il2CppDumper <ipa-app-dir> <out-dir>
+```
+- ```ipa-app-dir``` is the *.app folder under the Payload folder after extracting the IPA
+- ```<out-dir>``` when empty, the export directory defaults to ```<ipa-app-dir>/../../out/```
+
+
 ## Usage
 
 Run `Il2CppDumper.exe` and choose the il2cpp executable file and `global-metadata.dat` file, then enter the information as prompted
