@@ -31,7 +31,59 @@ namespace Il2CppDumper
                 ShowHelp();
                 return;
             }
-            if (args.Length > 1)
+            if (args.Length == 1)
+            {
+                string path = Path.GetFullPath(args[0]);
+                // ipa解压后Payload下的路径
+                if (path.EndsWith(".app"))
+                {
+                    // 使用Path.DirectorySeparatorChar来确保跨平台兼容性
+                    var metadataRelPath = $"Data{Path.DirectorySeparatorChar}Managed{Path.DirectorySeparatorChar}Metadata{Path.DirectorySeparatorChar}global-metadata.dat";
+                    var frameworkRelPath = $"Frameworks{Path.DirectorySeparatorChar}UnityFramework.framework{Path.DirectorySeparatorChar}UnityFramework";
+
+                    metadataPath = Path.Combine(path, metadataRelPath);
+                    il2cppPath = Path.Combine(path, frameworkRelPath);
+                    Console.WriteLine($"[+] metadata path {metadataPath}");
+                    Console.WriteLine($"[+] il2cpp path {il2cppPath}");
+                }
+                //获取path的父文件夹路径
+                var parentDir = Path.GetDirectoryName(path);
+                parentDir = Path.GetDirectoryName(parentDir);
+                outputDir =  parentDir + Path.DirectorySeparatorChar + "out" + Path.DirectorySeparatorChar;
+                Console.WriteLine($"[+] Result Save to {outputDir}");
+                if (!Directory.Exists(outputDir))
+                {
+                    Directory.CreateDirectory(outputDir);
+                }
+            }
+            if (args.Length == 2)
+            {
+                string path = Path.GetFullPath(args[0]);
+                outputDir = Path.GetFullPath(args[1]);
+                //outputDir后缀没有斜杠
+                if (!outputDir.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                {
+                    outputDir += Path.DirectorySeparatorChar;
+                }
+                // ipa解压后Payload下的路径
+                if (path.EndsWith(".app"))
+                {
+                    // 使用Path.DirectorySeparatorChar来确保跨平台兼容性
+                    var metadataRelPath = $"Data{Path.DirectorySeparatorChar}Managed{Path.DirectorySeparatorChar}Metadata{Path.DirectorySeparatorChar}global-metadata.dat";
+                    var frameworkRelPath = $"Frameworks{Path.DirectorySeparatorChar}UnityFramework.framework{Path.DirectorySeparatorChar}UnityFramework";
+
+                    metadataPath = Path.Combine(path, metadataRelPath);
+                    il2cppPath = Path.Combine(path, frameworkRelPath);
+                    Console.WriteLine($"[+] metadata path {metadataPath}");
+                    Console.WriteLine($"[+] il2cpp path {il2cppPath}");
+                }
+                Console.WriteLine($"[+] Result Save to {outputDir}");
+                if (!Directory.Exists(outputDir))
+                {
+                    Directory.CreateDirectory(outputDir);
+                }
+            }
+            else if (args.Length > 1)
             {
                 foreach (var arg in args)
                 {
@@ -50,7 +102,8 @@ namespace Il2CppDumper
                     else if (Directory.Exists(arg))
                     {
                         outputDir = Path.GetFullPath(arg) + Path.DirectorySeparatorChar;
-                    }else
+                    }
+                    else
                     {
                         outputDir = Path.GetFullPath(arg) + Path.DirectorySeparatorChar;
                         //创建文件夹
