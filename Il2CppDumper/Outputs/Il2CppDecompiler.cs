@@ -402,7 +402,6 @@ namespace Il2CppDumper
                                             writer.Write($"\t{methodSpecTypeName}.{methodSpecMethodName}() {{ }}\n");
                                         }
                                     }
-                                    writer.Write("\t*/\n");
                                 }
                             }
                         }
