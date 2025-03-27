@@ -69,7 +69,7 @@ namespace Il2CppDumper
                         writer.Write($"\n// Namespace: {metadata.GetStringFromIndex(typeDef.namespaceIndex)}\n");
                         if (config.DumpAttribute)
                         {
-                            writer.Write(GetCustomAttribute(imageDef, typeDef.customAttributeIndex, typeDef.token));
+                            writer.Write(GetCustomAttribute(config.DumpMethodSimplify, imageDef, typeDef.customAttributeIndex, typeDef.token));
                         }
                         if (config.DumpAttribute && (typeDef.flags & TYPE_ATTRIBUTE_SERIALIZABLE) != 0)
                             writer.Write("[Serializable]\n");
@@ -130,7 +130,7 @@ namespace Il2CppDumper
                                 var isConst = false;
                                 if (config.DumpAttribute)
                                 {
-                                    writer.Write(GetCustomAttribute(imageDef, fieldDef.customAttributeIndex, fieldDef.token, "\t"));
+                                    writer.Write(GetCustomAttribute(config.DumpMethodSimplify, imageDef, fieldDef.customAttributeIndex, fieldDef.token, "\t"));
                                 }
                                 writer.Write("\t");
                                 var access = fieldType.attrs & FIELD_ATTRIBUTE_FIELD_ACCESS_MASK;
@@ -215,7 +215,7 @@ namespace Il2CppDumper
                                 var propertyDef = metadata.propertyDefs[i];
                                 if (config.DumpAttribute)
                                 {
-                                    writer.Write(GetCustomAttribute(imageDef, propertyDef.customAttributeIndex, propertyDef.token, "\t"));
+                                    writer.Write(GetCustomAttribute(config.DumpMethodSimplify, imageDef, propertyDef.customAttributeIndex, propertyDef.token, "\t"));
                                 }
                                 writer.Write("\t");
                                 if (propertyDef.get >= 0)
@@ -253,7 +253,7 @@ namespace Il2CppDumper
                                 var isAbstract = (methodDef.flags & METHOD_ATTRIBUTE_ABSTRACT) != 0;
                                 if (config.DumpAttribute)
                                 {
-                                    writer.Write(GetCustomAttribute(imageDef, methodDef.customAttributeIndex, methodDef.token, "\t"));
+                                    writer.Write(GetCustomAttribute(config.DumpMethodSimplify, imageDef, methodDef.customAttributeIndex, methodDef.token, "\t"));
                                 }
                                 if (config.DumpMethodOffset)
                                 {
@@ -374,25 +374,32 @@ namespace Il2CppDumper
 
                                 if (il2Cpp.methodDefinitionMethodSpecs.TryGetValue(i, out var methodSpecs))
                                 {
-                                    writer.Write("\t/* GenericInstMethod :\n");
                                     var groups = methodSpecs.GroupBy(x => il2Cpp.methodSpecGenericMethodPointers[x]);
                                     foreach (var group in groups)
                                     {
-                                        writer.Write("\t|\n");
+                                        writer.Write("\n");
                                         var genericMethodPointer = group.Key;
                                         if (genericMethodPointer > 0)
                                         {
                                             var fixedPointer = il2Cpp.GetRVA(genericMethodPointer);
-                                            writer.Write($"\t|-RVA: 0x{fixedPointer:X} Offset: 0x{il2Cpp.MapVATR(genericMethodPointer):X} VA: 0x{genericMethodPointer:X}\n");
+                                            if (config.DumpMethodSimplify){
+                                                writer.Write($"\t// RVA: 0x{fixedPointer:X} VA: 0x{genericMethodPointer:X}\n");
+                                            }else{
+                                                writer.Write($"\t// RVA: 0x{fixedPointer:X} Offset: 0x{il2Cpp.MapVATR(genericMethodPointer):X} VA: 0x{genericMethodPointer:X}\n");
+                                            }
                                         }
                                         else
                                         {
-                                            writer.Write("\t|-RVA: -1 Offset: -1\n");
+                                            if(config.DumpMethodSimplify){
+                                                writer.Write("\t// RVA: -1 VA: -1\n");
+                                            }else{
+                                                writer.Write("\t// RVA: -1 Offset: -1\n");
+                                            }
                                         }
                                         foreach (var methodSpec in group)
                                         {
                                             (var methodSpecTypeName, var methodSpecMethodName) = executor.GetMethodSpecName(methodSpec);
-                                            writer.Write($"\t|-{methodSpecTypeName}.{methodSpecMethodName}\n");
+                                            writer.Write($"\t{methodSpecTypeName}.{methodSpecMethodName}() {{ }}\n");
                                         }
                                     }
                                     writer.Write("\t*/\n");
@@ -413,7 +420,7 @@ namespace Il2CppDumper
             writer.Close();
         }
 
-        public string GetCustomAttribute(Il2CppImageDefinition imageDef, int customAttributeIndex, uint token, string padding = "")
+        public string GetCustomAttribute(bool simplyfy, Il2CppImageDefinition imageDef, int customAttributeIndex, uint token, string padding = "")
         {
             if (il2Cpp.Version < 21)
                 return string.Empty;
@@ -429,12 +436,21 @@ namespace Il2CppDumper
                     for (var i = 0; i < attributeTypeRange.count; i++)
                     {
                         var typeIndex = metadata.attributeTypes[attributeTypeRange.start + i];
-                        sb.AppendFormat("{0}[{1}] // RVA: 0x{2:X} Offset: 0x{3:X} VA: 0x{4:X}\n",
+                        
+                        if (!simplyfy){
+                            sb.AppendFormat("{0}[{1}] // RVA: 0x{2:X} Offset: 0x{3:X} VA: 0x{4:X}\n",
                             padding,
                             executor.GetTypeName(il2Cpp.types[typeIndex], false, false),
                             fixedMethodPointer,
                             il2Cpp.MapVATR(methodPointer),
                             methodPointer);
+                        }else{
+                            sb.AppendFormat("{0}[{1}] // RVA: 0x{2:X} VA: 0x{3:X}\n",
+                            padding,
+                            executor.GetTypeName(il2Cpp.types[typeIndex], false, false),
+                            fixedMethodPointer,
+                            methodPointer);
+                        }
                     }
                     return sb.ToString();
                 }
